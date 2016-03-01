@@ -5,8 +5,9 @@ module.exports = function (req, res, next) {
   // default roll is 2d6
   var matches;
   var times = 1;
-  var die = 6;
+  var die = 10;
   var qualifier = 0;
+  var qualifierSign = false;
   var rolls = [];
   var total = 0;
   var botPayload = {};
@@ -24,6 +25,7 @@ module.exports = function (req, res, next) {
     } else if (matches && matches[4] && matches[5] && matches[6] && matches[7] && matches[8]) {
       times = matches[4];
       die = matches[6];
+      qualifierSign = true;
       qualifier = parseInt(matches[8]);
 
     } else {
@@ -32,7 +34,6 @@ module.exports = function (req, res, next) {
 
     }
   }
-
   // roll dice and sum
   for (var i = 0; i < times; i++) {
     var currentRoll = roll(1, die);
@@ -42,13 +43,13 @@ module.exports = function (req, res, next) {
 
 
   qualifiedTotal = parseInt(total);
-  //if roll was senbt with plus sign, add it to total, else subtract it.
-  if (matches[7] == "+") {
+  //if roll was sent with plus sign, add it to total, else subtract it.
+  if (qualifierSign === true && matches[7] == "+") {
      qualifiedTotal += qualifier;
-  } else if (matches[7] == "-") {
+  } else if (qualifierSign === true && matches[7] == "-") {
       qualifiedTotal -= qualifier;
     // write response message and add to payload
-  }
+  } 
   if (times > 1 && qualifier < 1) {
     // if rolling more one than dice, but with no qualifier, show all dice and calculated total
     botPayload.text = req.body.user_name + ' rolled ' + times + 'd' + die + ':\n' +
